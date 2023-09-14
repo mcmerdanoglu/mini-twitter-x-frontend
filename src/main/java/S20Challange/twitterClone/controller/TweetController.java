@@ -11,7 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 
 @RestController
-@RequestMapping("/")
+@RequestMapping("/tweet")
 @Validated
 public class TweetController {
 

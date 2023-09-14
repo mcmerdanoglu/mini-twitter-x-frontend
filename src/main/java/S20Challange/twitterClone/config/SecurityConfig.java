@@ -22,7 +22,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager autManager(UserDetailsService userDetailsService) {
+    public AuthenticationManager authManager(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         return new ProviderManager(daoAuthenticationProvider);
@@ -32,13 +32,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/profile/**").permitAll();
+                    auth.requestMatchers("/user/**").permitAll();
                     auth.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
-    /* Aşağıdaki herkese açık giriş, üstteki ise otantike olanlara erişim izni olan yöntem
+
+/*
+    // Aşağıdaki herkese açık giriş, üstteki ise otantike olanlara erişim izni olan yöntem
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         return http.csrf(csrf ->csrf.disable())
@@ -47,5 +49,5 @@ public class SecurityConfig {
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
-     */
+*/
 }

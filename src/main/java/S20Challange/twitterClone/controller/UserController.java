@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/profile")
+@RequestMapping("/user")
 public class UserController {
 
     public AuthenticationService authenticationService;
@@ -22,6 +22,6 @@ public class UserController {
 
     @PostMapping("/register")
     public User register(@RequestBody RegistrationUser registrationUser) {
-        return authenticationService.register(registrationUser.getEmail(), registrationUser.getPassword());
+        return authenticationService.register(registrationUser.getEmail(), registrationUser.getPassword(), registrationUser.getUsername());
     }
 }

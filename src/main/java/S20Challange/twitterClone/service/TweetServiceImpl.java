@@ -29,6 +29,7 @@ public class TweetServiceImpl implements TweetService{
         if(tweet.isPresent()){
             return tweet.get();
         }
+        //TODO throw exception
         return null;
     }
 

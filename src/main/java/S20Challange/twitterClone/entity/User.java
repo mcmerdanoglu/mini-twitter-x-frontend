@@ -2,6 +2,7 @@ package S20Challange.twitterClone.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,9 +20,12 @@ public class User implements UserDetails { //Önce @Data yorumlaştırılır öy
     @Column(name = "id")
     private int id;
 
+
     @Column(name = "username")
     private String username;
 
+
+    @Getter
     @Column(name = "email")
     private String email;
 
@@ -50,8 +54,8 @@ public class User implements UserDetails { //Önce @Data yorumlaştırılır öy
 
     @Override
     public String getUsername() {
-        //return username;
-        return email;
+       return username;
+        //return email;
     }
 
     @Override
