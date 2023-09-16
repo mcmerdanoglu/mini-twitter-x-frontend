@@ -24,6 +24,26 @@ public class Reply {
     @Column(name="retweets")
     private int retweets;
 
+    public void incrementLikes() {
+        this.likes++;
+    }
+
+    public void decrementLikes() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
+    public void incrementRetweets() {
+        this.retweets++;
+    }
+
+    public void decrementRetweets() {
+        if (this.retweets > 0) {
+            this.retweets--;
+        }
+    }
+
     @JsonIgnore
     @ManyToOne (cascade = {CascadeType.DETACH,CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.EAGER)
     //Çok olan reply tek olan tweet olduğu için reply classına ManyToOne yazdık!!!

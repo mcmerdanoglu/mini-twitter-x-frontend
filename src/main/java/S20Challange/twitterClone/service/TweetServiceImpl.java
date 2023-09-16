@@ -58,4 +58,44 @@ public class TweetServiceImpl implements TweetService{
     public void delete(Tweet tweet) {
         tweetRepository.delete(tweet);
     }
+
+    @Override
+    public Tweet likeTweet(int id) {
+        Tweet tweet = tweetRepository.findById(id).orElse(null);
+        if (tweet != null) {
+            tweet.incrementLikes();
+            tweetRepository.save(tweet);
+        }
+        return tweet;
+    }
+
+    @Override
+    public Tweet unlikeTweet(int id) {
+        Tweet tweet = tweetRepository.findById(id).orElse(null);
+        if (tweet != null) {
+            tweet.decrementLikes();
+            tweetRepository.save(tweet);
+        }
+        return tweet;
+    }
+
+    @Override
+    public Tweet retweet(int id) {
+        Tweet tweet = tweetRepository.findById(id).orElse(null);
+        if (tweet != null) {
+            tweet.incrementRetweets();
+            tweetRepository.save(tweet);
+        }
+        return tweet;
+    }
+
+    @Override
+    public Tweet undoRetweet(int id) {
+        Tweet tweet = tweetRepository.findById(id).orElse(null);
+        if (tweet != null) {
+            tweet.decrementRetweets();
+            tweetRepository.save(tweet);
+        }
+        return tweet;
+    }
 }

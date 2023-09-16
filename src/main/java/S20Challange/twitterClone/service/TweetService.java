@@ -15,4 +15,12 @@ public interface TweetService {
     void delete(Tweet tweet);
 
     void softDelete(int id);//tweet delete için tweet tablosundaki useri önce nulla çekmek için yazıldı ama işe yaramamadı
+
+    Tweet likeTweet(int id);
+
+    Tweet unlikeTweet(int id);
+
+    Tweet retweet(int id);
+
+    Tweet undoRetweet(int id);
 }

@@ -26,6 +26,26 @@ public class Tweet {
     @Column(name="retweets")
     private int retweets;
 
+    public void incrementLikes() {
+        this.likes++;
+    }
+
+    public void decrementLikes() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
+    public void incrementRetweets() {
+        this.retweets++;
+    }
+
+    public void decrementRetweets() {
+        if (this.retweets > 0) {
+            this.retweets--;
+        }
+    }
+
     @JsonIgnore
     @OneToMany(mappedBy = "tweet", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     //Reply classında tweet olarak işaretlendin manasında.(tweet_id in reply foreign key)

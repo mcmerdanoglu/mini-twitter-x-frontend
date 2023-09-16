@@ -12,6 +12,8 @@ import S20Challange.twitterClone.service.ReplyService;
 import S20Challange.twitterClone.service.TweetService;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -89,6 +91,84 @@ public class ReplyController {
             }
         } else {
             return null;
+        }
+    }
+
+
+
+    /*---------------------------LIKE & UNLIKE and RETWEET & UNDORETWEET METHODS-------------------------------------------*/
+
+    @PostMapping("/like/{id}")
+    public ResponseEntity<ReplyResponse> likeReply(@Positive @PathVariable int id) {
+        Reply likedReply = replyService.likeReply(id);
+        if (likedReply != null) {
+            // Create and return a response with updated likes count
+            ReplyResponse replyResponse = new ReplyResponse();
+            replyResponse.setId(likedReply.getId());
+            replyResponse.setUsername(likedReply.getUser().getUsername());
+            replyResponse.setContent(likedReply.getContent());
+            replyResponse.setLikes(likedReply.getLikes());
+            // ... set other fields ...
+            return new ResponseEntity<>(replyResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/like/{id}")
+    public ResponseEntity<ReplyResponse> unlikeReply(@Positive @PathVariable int id) {
+        Reply unlikedReply = replyService.unlikeReply(id);
+        if (unlikedReply != null) {
+            // Create and return a response with updated likes count
+            ReplyResponse replyResponse = new ReplyResponse();
+            replyResponse.setId(unlikedReply.getId());
+            replyResponse.setUsername(unlikedReply.getUser().getUsername());
+            replyResponse.setContent(unlikedReply.getContent());
+            replyResponse.setLikes(unlikedReply.getLikes());
+            // ... set other fields ...
+            return new ResponseEntity<>(replyResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/retweet/{id}")
+    public ResponseEntity<ReplyResponse> retweetReply(@Positive @PathVariable int id) {
+        Reply retweetedReply = replyService.retweetReply(id);
+        if (retweetedReply != null) {
+            // Create and return a response with updated likes count
+            ReplyResponse replyResponse = new ReplyResponse();
+            replyResponse.setId(retweetedReply.getId());
+            replyResponse.setUsername(retweetedReply.getUser().getUsername());
+            replyResponse.setContent(retweetedReply.getContent());
+            replyResponse.setLikes(retweetedReply.getLikes());
+            replyResponse.setRetweets(retweetedReply.getRetweets());
+            // ... set other fields ...
+            return new ResponseEntity<>(replyResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/retweet/{id}")
+    public ResponseEntity<ReplyResponse> undoRetweetReply(@Positive @PathVariable int id) {
+        Reply undoRetweetedReply = replyService.undoRetweetReply(id);
+        if (undoRetweetedReply != null) {
+            // Create and return a response with updated likes count
+            ReplyResponse replyResponse = new ReplyResponse();
+            replyResponse.setId(undoRetweetedReply.getId());
+            replyResponse.setUsername(undoRetweetedReply.getUser().getUsername());
+            replyResponse.setContent(undoRetweetedReply.getContent());
+            replyResponse.setLikes(undoRetweetedReply.getLikes());
+            replyResponse.setRetweets(undoRetweetedReply.getRetweets());
+            // ... set other fields ...
+            return new ResponseEntity<>(replyResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

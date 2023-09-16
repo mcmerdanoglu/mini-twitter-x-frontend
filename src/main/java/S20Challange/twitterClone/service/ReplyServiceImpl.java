@@ -45,4 +45,44 @@ public class ReplyServiceImpl implements ReplyService{
     public void delete(Reply reply) {
         replyRepository.delete(reply);
     }
+
+    @Override
+    public Reply likeReply(int id) {
+        Reply reply = replyRepository.findById(id).orElse(null);
+        if (reply != null) {
+            reply.incrementLikes();
+            replyRepository.save(reply);
+        }
+        return reply;
+    }
+
+    @Override
+    public Reply unlikeReply(int id) {
+        Reply reply = replyRepository.findById(id).orElse(null);
+        if (reply != null) {
+            reply.decrementLikes();
+            replyRepository.save(reply);
+        }
+        return reply;
+    }
+
+    @Override
+    public Reply retweetReply(int id) {
+        Reply reply = replyRepository.findById(id).orElse(null);
+        if (reply != null) {
+            reply.incrementRetweets();
+            replyRepository.save(reply);
+        }
+        return reply;
+    }
+
+    @Override
+    public Reply undoRetweetReply(int id) {
+        Reply reply = replyRepository.findById(id).orElse(null);
+        if (reply != null) {
+            reply.decrementRetweets();
+            replyRepository.save(reply);
+        }
+        return reply;
+    }
 }

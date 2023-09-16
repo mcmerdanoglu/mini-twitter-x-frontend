@@ -14,4 +14,12 @@ public interface ReplyService {
     Reply save(Reply reply);
 
     void delete(Reply reply);
+
+    Reply likeReply(int id);
+
+    Reply unlikeReply(int id);
+
+    Reply retweetReply(int id);
+
+    Reply undoRetweetReply(int id);
 }

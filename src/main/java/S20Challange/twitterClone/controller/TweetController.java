@@ -11,6 +11,8 @@ import S20Challange.twitterClone.service.TweetService;
 import S20Challange.twitterClone.service.UserService;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -63,6 +65,8 @@ public class TweetController {
                         replyResponse.setId(reply.getId());
                         replyResponse.setContent(reply.getContent());
                         replyResponse.setUsername(reply.getUser().getUsername());
+                        replyResponse.setLikes(reply.getLikes());
+                        replyResponse.setRetweets(reply.getRetweets());
                         return replyResponse;
                     })
                     .collect(Collectors.toList());
@@ -105,6 +109,8 @@ public class TweetController {
                     replyResponse.setId(reply.getId());
                     replyResponse.setContent(reply.getContent());
                     replyResponse.setUsername(reply.getUser().getUsername());
+                    replyResponse.setLikes(reply.getLikes());
+                    replyResponse.setRetweets(reply.getRetweets());
                     return replyResponse;
                 })
                 .collect(Collectors.toList());
@@ -143,11 +149,6 @@ public class TweetController {
                     User authenticatedUser = userOptional.get();
                     tweet.setUser(authenticatedUser);
 
-                        /*
-                    if (tweet.getReplyList() == null) {
-                        tweet.setReplyList(new ArrayList<>());
-                    }//setting replyList empty for the begining
-                        */
                     Tweet savedTweet = tweetService.save(tweet);
 
                     TweetResponse tweetResponse = new TweetResponse();
@@ -199,25 +200,12 @@ public class TweetController {
             Tweet tweetToUpdate = tweetService.find(id);
 
             if (tweetToUpdate != null) {
-               // User originalUser = tweetToUpdate.getUser();
 
                 tweetToUpdate.setContent(updatedTweet.getContent());
                 tweetToUpdate.setLikes(updatedTweet.getLikes());
                 tweetToUpdate.setRetweets(updatedTweet.getRetweets());
-                //tweetToUpdate.setReplyList(updatedTweet.getReplyList());
 
-               // tweetToUpdate.setUser(originalUser);
                 tweetService.save(tweetToUpdate);
-                /*
-                User user = tweetToUpdate.getUser();
-                if (user != null) {
-                    UserResponse userResponse = new UserResponse();
-                    userResponse.setId(user.getId());
-                    userResponse.setUsername(user.getUsername());
-                    userResponse.setEmail(user.getEmail());
-                    tweetToUpdateResponse.setUserResponse(userResponse);
-                }
-                    */
 
                 tweetToUpdateResponse.setContent(tweetToUpdate.getContent());
                 return tweetToUpdateResponse;
@@ -312,5 +300,76 @@ public TweetResponse deleteTweet(@Positive @PathVariable int id) {
     return null;
 }
 
+/*---------------------------LIKE & UNLIKE and RETWEET & UNDORETWEET METHODS-------------------------------------------*/
+
+    @PostMapping("/like/{id}")
+    public ResponseEntity<TweetResponse> likeTweet(@Positive @PathVariable int id) {
+        Tweet likedTweet = tweetService.likeTweet(id);
+        if (likedTweet != null) {
+            // Create and return a response with updated likes count
+            TweetResponse tweetResponse = new TweetResponse();
+            tweetResponse.setId(likedTweet.getId());
+            tweetResponse.setContent(likedTweet.getContent());
+            tweetResponse.setLikes(likedTweet.getLikes());
+            // ... set other fields ...
+            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/like/{id}")
+    public ResponseEntity<TweetResponse> unlikeTweet(@Positive @PathVariable int id) {
+        Tweet unlikedTweet = tweetService.unlikeTweet(id);
+        if (unlikedTweet != null) {
+            // Create and return a response with updated likes count
+            TweetResponse tweetResponse = new TweetResponse();
+            tweetResponse.setId(unlikedTweet.getId());
+            tweetResponse.setContent(unlikedTweet.getContent());
+            tweetResponse.setLikes(unlikedTweet.getLikes());
+            // ... set other fields ...
+            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/retweet/{id}")
+    public ResponseEntity<TweetResponse> retweet(@Positive @PathVariable int id) {
+        Tweet retweetedTweet = tweetService.retweet(id);
+        if (retweetedTweet != null) {
+            // Create and return a response with updated likes count
+            TweetResponse tweetResponse = new TweetResponse();
+            tweetResponse.setId(retweetedTweet.getId());
+            tweetResponse.setContent(retweetedTweet.getContent());
+            tweetResponse.setLikes(retweetedTweet.getLikes());
+            tweetResponse.setRetweets(retweetedTweet.getRetweets());
+            // ... set other fields ...
+            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/retweet/{id}")
+    public ResponseEntity<TweetResponse> undoRetweet(@Positive @PathVariable int id) {
+        Tweet undoRetweetedTweet = tweetService.undoRetweet(id);
+        if (undoRetweetedTweet != null) {
+            // Create and return a response with updated likes count
+            TweetResponse tweetResponse = new TweetResponse();
+            tweetResponse.setId(undoRetweetedTweet.getId());
+            tweetResponse.setContent(undoRetweetedTweet.getContent());
+            tweetResponse.setLikes(undoRetweetedTweet.getLikes());
+            tweetResponse.setRetweets(undoRetweetedTweet.getRetweets());
+            // ... set other fields ...
+            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+        } else {
+            // Handle the case where the tweet is not found
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 }
 
