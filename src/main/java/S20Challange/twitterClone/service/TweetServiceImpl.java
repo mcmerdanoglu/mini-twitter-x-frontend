@@ -15,7 +15,6 @@ import java.util.Optional;
 public class TweetServiceImpl implements TweetService{
 
     private TweetRepository tweetRepository;
-   // private UserRepository userRepository;//User bilgisini tutabilmek için eklendi!
 
     @Autowired
     public TweetServiceImpl(TweetRepository tweetRepository) {
@@ -43,7 +42,19 @@ public class TweetServiceImpl implements TweetService{
     }
 
     @Override
-    //@Transactional
+    @Transactional
+    public void softDelete(int id) {
+        Optional<Tweet> tweetOptional = tweetRepository.findById(id);
+        if (tweetOptional.isPresent()) {
+            Tweet tweet = tweetOptional.get();
+            tweet.setUser(null);
+            tweetRepository.save(tweet); // Set the user to null
+            tweetRepository.delete(tweet); // Delete the tweet from the database
+        }
+    }
+
+    @Override
+    @Transactional
     public void delete(Tweet tweet) {
         tweetRepository.delete(tweet);
     }

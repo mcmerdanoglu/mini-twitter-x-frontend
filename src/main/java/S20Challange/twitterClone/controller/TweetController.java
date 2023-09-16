@@ -26,14 +26,11 @@ import java.util.Optional;
 public class TweetController {
 
     private TweetService tweetService;
-
-    private UserService userService;
-    private UserRepository userRepository;
+    private UserRepository userRepository;//Aslında burada olmaması lazım ama çağrılan method için mecbur kalındı
 
     @Autowired
-    public TweetController(TweetService tweetService, UserService userService, UserRepository userRepository) {
+    public TweetController(TweetService tweetService, UserRepository userRepository) {
         this.tweetService = tweetService;
-        this.userService = userService;
         this.userRepository = userRepository;
     }
 
@@ -202,7 +199,7 @@ public class TweetController {
         return tweetToDelete;
     }
 */
-
+/*
     @DeleteMapping("/{id}")
     public TweetResponse deleteTweet(@Positive @PathVariable int id) {
         Tweet tweetToDelete = tweetService.find(id);
@@ -235,6 +232,38 @@ public class TweetController {
         }
         return null;
     }
+*/
+@DeleteMapping("/{id}")
+public TweetResponse deleteTweet(@Positive @PathVariable int id) {
+    Tweet tweetToDelete = tweetService.find(id);
+
+    if (tweetToDelete != null) {
+        // You can still create a response for the deleted Tweet before deleting it
+        TweetResponse tweetResponse = new TweetResponse();
+        tweetResponse.setId(tweetToDelete.getId());
+        tweetResponse.setContent(tweetToDelete.getContent());
+        tweetResponse.setLikes(tweetToDelete.getLikes());
+        tweetResponse.setRetweets(tweetToDelete.getRetweets());
+        tweetResponse.setReplyList(tweetToDelete.getReplyList());
+
+        UserResponse userResponse = new UserResponse();
+        User user = tweetToDelete.getUser();
+
+        if (user != null) {
+            userResponse.setId(user.getId());
+            userResponse.setUsername(user.getUsername());
+            userResponse.setEmail(user.getEmail());
+        }
+
+        tweetResponse.setUserResponse(userResponse);
+
+        tweetService.softDelete(id);
+        tweetService.delete(tweetToDelete);
+
+        return tweetResponse;
+    }
+    return null;
+}
 
 }
 

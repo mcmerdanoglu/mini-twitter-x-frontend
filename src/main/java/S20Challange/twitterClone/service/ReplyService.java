@@ -11,7 +11,7 @@ public interface ReplyService {
 
     Reply find(int id);
 
-    Tweet save(Tweet tweet);
+    Reply save(Reply reply);
 
-    void delete(Tweet tweet);
+    void delete(Reply reply);
 }
