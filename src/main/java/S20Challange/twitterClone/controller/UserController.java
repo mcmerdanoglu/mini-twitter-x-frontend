@@ -1,5 +1,7 @@
 package S20Challange.twitterClone.controller;
 
+import S20Challange.twitterClone.dto.LoginRequest;
+import S20Challange.twitterClone.dto.LoginResponse;
 import S20Challange.twitterClone.dto.RegistrationUser;
 import S20Challange.twitterClone.entity.User;
 import S20Challange.twitterClone.service.AuthenticationService;
@@ -23,5 +25,10 @@ public class UserController {
     @PostMapping("/register")
     public User register(@RequestBody RegistrationUser registrationUser) {
         return authenticationService.register(registrationUser.getEmail(), registrationUser.getPassword(), registrationUser.getUsername());
+    }
+
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest loginRequest) {
+        return authenticationService.login(loginRequest.getEmail(), loginRequest.getPassword());
     }
 }

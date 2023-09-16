@@ -25,11 +25,11 @@ public class Tweet {
     @Column(name="retweets")
     private int retweets;
 
-    @OneToMany(mappedBy = "tweet", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "tweet", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     //Reply classında tweet olarak işaretlendin manasında.(tweet_id in reply foreign key)
     private List<Reply> replyList;
 
-    @ManyToOne (cascade = {CascadeType.DETACH,CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH})
+    @ManyToOne (cascade = {CascadeType.DETACH,CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.EAGER)
     //Çok olan tweet tek olan user olduğu için tweet classına ManyToOne yazdık!!!
     @JoinColumn(name="user_id") //foreign key
     private User user;

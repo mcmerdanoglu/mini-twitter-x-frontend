@@ -1,5 +1,6 @@
 package S20Challange.twitterClone.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -32,13 +33,13 @@ public class User implements UserDetails { //Önce @Data yorumlaştırılır öy
     @Column(name = "password")
     private String password;
 
-    //@JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL/*, fetch = FetchType.EAGER*/)
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     //Tweet classında user olarak işaretlendin manasında.(user_id in tweet foreign key)
     private List<Tweet> tweetList;
 
-    //@JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL/*, fetch = FetchType.EAGER*/)
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     //Reply classında user olarak işaretlendin manasında.(user_id in reply foreign key)
     private List<Reply> replyList;
 

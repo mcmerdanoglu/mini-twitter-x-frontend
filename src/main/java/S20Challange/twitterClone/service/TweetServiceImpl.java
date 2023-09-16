@@ -1,7 +1,10 @@
 package S20Challange.twitterClone.service;
 
 import S20Challange.twitterClone.dao.TweetRepository;
+import S20Challange.twitterClone.dao.UserRepository;
 import S20Challange.twitterClone.entity.Tweet;
+import S20Challange.twitterClone.entity.User;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +15,7 @@ import java.util.Optional;
 public class TweetServiceImpl implements TweetService{
 
     private TweetRepository tweetRepository;
+   // private UserRepository userRepository;//User bilgisini tutabilmek için eklendi!
 
     @Autowired
     public TweetServiceImpl(TweetRepository tweetRepository) {
@@ -39,6 +43,7 @@ public class TweetServiceImpl implements TweetService{
     }
 
     @Override
+    //@Transactional
     public void delete(Tweet tweet) {
         tweetRepository.delete(tweet);
     }

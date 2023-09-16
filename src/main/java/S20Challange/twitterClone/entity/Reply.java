@@ -23,12 +23,12 @@ public class Reply {
     @Column(name="retweets")
     private int retweets;
 
-    @ManyToOne (cascade = {CascadeType.DETACH,CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH})
+    @ManyToOne (cascade = {CascadeType.DETACH,CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.EAGER)
     //Çok olan reply tek olan tweet olduğu için reply classına ManyToOne yazdık!!!
     @JoinColumn(name="tweet_id") //foreign key
     private Tweet tweet;
 
-    @ManyToOne (cascade = {CascadeType.DETACH,CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH})
+    @ManyToOne (cascade = {CascadeType.DETACH,CascadeType.MERGE, CascadeType.PERSIST,CascadeType.REFRESH}, fetch = FetchType.EAGER)
     //Çok olan reply tek olan user olduğu için reply classına ManyToOne yazdık!!!
     @JoinColumn(name="user_id") //foreign key
     private User user;
