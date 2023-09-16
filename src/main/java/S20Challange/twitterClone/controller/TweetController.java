@@ -1,6 +1,7 @@
 package S20Challange.twitterClone.controller;
 
 import S20Challange.twitterClone.dao.UserRepository;
+import S20Challange.twitterClone.dto.ReplyResponse;
 import S20Challange.twitterClone.dto.TweetResponse;
 import S20Challange.twitterClone.dto.UserResponse;
 import S20Challange.twitterClone.entity.Tweet;
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tweet")
@@ -41,7 +43,6 @@ public class TweetController {
         }
     */
 
-
     @GetMapping("/")
     public List<TweetResponse> getAllTweets() {
         List<Tweet> tweets = tweetService.findAll();
@@ -53,7 +54,20 @@ public class TweetController {
             tweetResponse.setContent(tweet.getContent());
             tweetResponse.setLikes(tweet.getLikes());
             tweetResponse.setRetweets(tweet.getRetweets());
-            tweetResponse.setReplyList(tweet.getReplyList());
+            //tweetResponse.setReplyList(tweet.getReplyList());
+
+            List<ReplyResponse> replyResponses = tweet.getReplyList()
+                    .stream()
+                    .map(reply -> {
+                        ReplyResponse replyResponse = new ReplyResponse();
+                        replyResponse.setId(reply.getId());
+                        replyResponse.setContent(reply.getContent());
+                        replyResponse.setUsername(reply.getUser().getUsername());
+                        return replyResponse;
+                    })
+                    .collect(Collectors.toList());
+
+            tweetResponse.setReplyList(replyResponses);
 
             UserResponse userResponse = new UserResponse();
             User user = tweet.getUser();
@@ -61,7 +75,7 @@ public class TweetController {
             userResponse.setUsername(user.getUsername());
             userResponse.setEmail(user.getEmail());
 
-            tweetResponse.setUserResponse(userResponse);
+            tweetResponse.setUsername(userResponse.getUsername());
 
             tweetResponses.add(tweetResponse);
         }
@@ -82,7 +96,20 @@ public class TweetController {
         tweetResponse.setContent(tweet.getContent());
         tweetResponse.setLikes(tweet.getLikes());
         tweetResponse.setRetweets(tweet.getRetweets());
-        tweetResponse.setReplyList(tweet.getReplyList());
+        //tweetResponse.setReplyList(tweet.getReplyList());
+
+        List<ReplyResponse> replyResponses = tweet.getReplyList()
+                .stream()
+                .map(reply -> {
+                    ReplyResponse replyResponse = new ReplyResponse();
+                    replyResponse.setId(reply.getId());
+                    replyResponse.setContent(reply.getContent());
+                    replyResponse.setUsername(reply.getUser().getUsername());
+                    return replyResponse;
+                })
+                .collect(Collectors.toList());
+
+        tweetResponse.setReplyList(replyResponses);
 
         UserResponse userResponse = new UserResponse();
         User user = tweet.getUser();
@@ -90,7 +117,7 @@ public class TweetController {
         userResponse.setUsername(user.getUsername());
         userResponse.setEmail(user.getEmail());
 
-        tweetResponse.setUserResponse(userResponse);
+        tweetResponse.setUsername(userResponse.getUsername());
 
         return tweetResponse;
     }
@@ -116,6 +143,11 @@ public class TweetController {
                     User authenticatedUser = userOptional.get();
                     tweet.setUser(authenticatedUser);
 
+                        /*
+                    if (tweet.getReplyList() == null) {
+                        tweet.setReplyList(new ArrayList<>());
+                    }//setting replyList empty for the begining
+                        */
                     Tweet savedTweet = tweetService.save(tweet);
 
                     TweetResponse tweetResponse = new TweetResponse();
@@ -123,14 +155,14 @@ public class TweetController {
                     tweetResponse.setContent(savedTweet.getContent());
                     tweetResponse.setLikes(savedTweet.getLikes());
                     tweetResponse.setRetweets(savedTweet.getRetweets());
-                    tweetResponse.setReplyList(savedTweet.getReplyList());
+
 
                     UserResponse userResponse = new UserResponse();
                     userResponse.setId(authenticatedUser.getId());
                     userResponse.setUsername(authenticatedUser.getUsername());
                     userResponse.setEmail(authenticatedUser.getEmail());
 
-                    tweetResponse.setUserResponse(userResponse);
+                    tweetResponse.setUsername(userResponse.getUsername());
 
                     return tweetResponse;
                 } else {
@@ -172,7 +204,7 @@ public class TweetController {
                 tweetToUpdate.setContent(updatedTweet.getContent());
                 tweetToUpdate.setLikes(updatedTweet.getLikes());
                 tweetToUpdate.setRetweets(updatedTweet.getRetweets());
-                tweetToUpdate.setReplyList(updatedTweet.getReplyList());
+                //tweetToUpdate.setReplyList(updatedTweet.getReplyList());
 
                // tweetToUpdate.setUser(originalUser);
                 tweetService.save(tweetToUpdate);
@@ -186,6 +218,8 @@ public class TweetController {
                     tweetToUpdateResponse.setUserResponse(userResponse);
                 }
                     */
+
+                tweetToUpdateResponse.setContent(tweetToUpdate.getContent());
                 return tweetToUpdateResponse;
             }
         }
@@ -244,7 +278,20 @@ public TweetResponse deleteTweet(@Positive @PathVariable int id) {
         tweetResponse.setContent(tweetToDelete.getContent());
         tweetResponse.setLikes(tweetToDelete.getLikes());
         tweetResponse.setRetweets(tweetToDelete.getRetweets());
-        tweetResponse.setReplyList(tweetToDelete.getReplyList());
+        //tweetResponse.setReplyList(tweetToDelete.getReplyList());
+
+        List<ReplyResponse> replyResponses = tweetToDelete.getReplyList()
+                .stream()
+                .map(reply -> {
+                    ReplyResponse replyResponse = new ReplyResponse();
+                    replyResponse.setId(reply.getId());
+                    replyResponse.setContent(reply.getContent());
+                    replyResponse.setUsername(reply.getUser().getUsername());
+                    return replyResponse;
+                })
+                .collect(Collectors.toList());
+
+        tweetResponse.setReplyList(replyResponses);
 
         UserResponse userResponse = new UserResponse();
         User user = tweetToDelete.getUser();
@@ -255,7 +302,7 @@ public TweetResponse deleteTweet(@Positive @PathVariable int id) {
             userResponse.setEmail(user.getEmail());
         }
 
-        tweetResponse.setUserResponse(userResponse);
+        tweetResponse.setUsername(userResponse.getUsername());
 
         tweetService.softDelete(id);
         tweetService.delete(tweetToDelete);

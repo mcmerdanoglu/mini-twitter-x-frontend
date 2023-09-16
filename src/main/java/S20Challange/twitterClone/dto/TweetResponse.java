@@ -16,9 +16,9 @@ import java.util.List;
 @AllArgsConstructor
 public class TweetResponse {
     private int id;
+    private String username;
     private String content;
     private int likes;
     private int retweets;
-    private List<Reply> replyList;
-    private UserResponse userResponse;
+    private List<ReplyResponse> replyList;
 }
