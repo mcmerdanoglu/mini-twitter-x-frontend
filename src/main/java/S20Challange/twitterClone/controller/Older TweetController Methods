@@ -1,0 +1,76 @@
+    /*
+        @GetMapping("/")
+        public List<Tweet> getAllTweets() {
+            return tweetService.findAll();
+        }
+    */
+
+        /*
+            @GetMapping("/{id}")
+            public Tweet getTweetById(@Positive @PathVariable int id) {
+                return tweetService.find(id);
+            }
+        */
+
+
+       /*
+            @PostMapping("/")
+             public Tweet addTweet(@RequestBody Tweet tweet){
+                 return tweetService.save(tweet);
+             }
+       */
+
+       /*
+           @PutMapping("/{id}")
+           public Tweet updateTweet(@RequestBody Tweet tweet, @PathVariable int id) {
+               Tweet tweetToUpdate = getTweetById(id);
+               if (tweetToUpdate != null) {
+                   tweet.setId(id);
+                   return tweetService.save(tweet);
+               }
+               return null;
+           }
+       */
+
+       /*
+           @DeleteMapping("/{id}")
+           public Tweet deleteTweet(@Positive @PathVariable int id) {
+               Tweet tweetToDelete = tweetService.find(id);
+               tweetService.delete(tweetToDelete);
+               return tweetToDelete;
+           }
+       */
+       /*
+           @DeleteMapping("/{id}")
+           public TweetResponse deleteTweet(@Positive @PathVariable int id) {
+               Tweet tweetToDelete = tweetService.find(id);
+
+               if (tweetToDelete != null) {
+
+                   tweetToDelete.setUser(null);
+
+                   TweetResponse tweetResponse = new TweetResponse();
+                   tweetResponse.setId(tweetToDelete.getId());
+                   tweetResponse.setContent(tweetToDelete.getContent());
+                   tweetResponse.setLikes(tweetToDelete.getLikes());
+                   tweetResponse.setRetweets(tweetToDelete.getRetweets());
+                   tweetResponse.setReplyList(tweetToDelete.getReplyList());
+
+                   UserResponse userResponse = new UserResponse();
+                   User user = tweetToDelete.getUser();
+
+                   if (user != null) {
+                       userResponse.setId(user.getId());
+                       userResponse.setUsername(user.getUsername());
+                       userResponse.setEmail(user.getEmail());
+                   }
+
+                   tweetResponse.setUserResponse(userResponse);
+
+                   tweetService.delete(tweetToDelete);
+
+                   return tweetResponse;
+               }
+               return null;
+           }
+       */

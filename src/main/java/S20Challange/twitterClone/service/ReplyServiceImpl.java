@@ -42,6 +42,16 @@ public class ReplyServiceImpl implements ReplyService{
 
     @Override
     @Transactional
+    public void softDelete(int id) {
+        Optional<Reply> replyOptional = replyRepository.findById(id);
+        if (replyOptional.isPresent()) {
+            Reply reply = replyOptional.get();
+            reply.setUser(null);
+        }
+    }
+
+    @Override
+    @Transactional
     public void delete(Reply reply) {
         replyRepository.delete(reply);
     }

@@ -6,9 +6,12 @@ import S20Challange.twitterClone.dto.TweetResponse;
 import S20Challange.twitterClone.dto.UserResponse;
 import S20Challange.twitterClone.entity.Tweet;
 import S20Challange.twitterClone.entity.User;
+import S20Challange.twitterClone.exceptions.GlobalExceptionHandler;
+import S20Challange.twitterClone.exceptions.MessageException;
 import S20Challange.twitterClone.service.TweetService;
 
 import S20Challange.twitterClone.service.UserService;
+import S20Challange.twitterClone.util.ControllersOrganiser;
 import jakarta.validation.constraints.Positive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,20 +33,15 @@ import java.util.stream.Collectors;
 public class TweetController {
 
     private TweetService tweetService;
+    private ControllersOrganiser controllersOrganiser;
     private UserRepository userRepository;//Aslında burada olmaması lazım ama çağrılan method için mecbur kalındı
 
     @Autowired
-    public TweetController(TweetService tweetService, UserRepository userRepository) {
+    public TweetController(TweetService tweetService, ControllersOrganiser controllersOrganiser, UserRepository userRepository) {
         this.tweetService = tweetService;
+        this.controllersOrganiser = controllersOrganiser;
         this.userRepository = userRepository;
     }
-
-    /*
-        @GetMapping("/")
-        public List<Tweet> getAllTweets() {
-            return tweetService.findAll();
-        }
-    */
 
     @GetMapping("/")
     public List<TweetResponse> getAllTweets() {
@@ -52,21 +50,15 @@ public class TweetController {
 
         for (Tweet tweet : tweets) {
             TweetResponse tweetResponse = new TweetResponse();
-            tweetResponse.setId(tweet.getId());
-            tweetResponse.setContent(tweet.getContent());
-            tweetResponse.setLikes(tweet.getLikes());
-            tweetResponse.setRetweets(tweet.getRetweets());
-            //tweetResponse.setReplyList(tweet.getReplyList());
+            //original setters
+            controllersOrganiser.organiseTweet(tweetResponse, tweet);
 
             List<ReplyResponse> replyResponses = tweet.getReplyList()
                     .stream()
                     .map(reply -> {
                         ReplyResponse replyResponse = new ReplyResponse();
-                        replyResponse.setId(reply.getId());
-                        replyResponse.setContent(reply.getContent());
-                        replyResponse.setUsername(reply.getUser().getUsername());
-                        replyResponse.setLikes(reply.getLikes());
-                        replyResponse.setRetweets(reply.getRetweets());
+                        //original setters
+                        controllersOrganiser.organiseReply(replyResponse, reply);
                         return replyResponse;
                     })
                     .collect(Collectors.toList());
@@ -74,43 +66,32 @@ public class TweetController {
             tweetResponse.setReplyList(replyResponses);
 
             UserResponse userResponse = new UserResponse();
-            User user = tweet.getUser();
-            userResponse.setId(user.getId());
-            userResponse.setUsername(user.getUsername());
-            userResponse.setEmail(user.getEmail());
-
+            //original setters
+            controllersOrganiser.organiseUser(userResponse, tweet);
             tweetResponse.setUsername(userResponse.getUsername());
-
             tweetResponses.add(tweetResponse);
         }
         return tweetResponses;
     }
 
-    /*
-        @GetMapping("/{id}")
-        public Tweet getTweetById(@Positive @PathVariable int id) {
-            return tweetService.find(id);
-        }
-    */
     @GetMapping("/{id}")
     public TweetResponse getTweetById(@Positive @PathVariable int id) {
         Tweet tweet = tweetService.find(id);
+
+        if (tweet == null) {
+            throw new MessageException("Tweet with given id " + id + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
         TweetResponse tweetResponse = new TweetResponse();
-        tweetResponse.setId(tweet.getId());
-        tweetResponse.setContent(tweet.getContent());
-        tweetResponse.setLikes(tweet.getLikes());
-        tweetResponse.setRetweets(tweet.getRetweets());
-        //tweetResponse.setReplyList(tweet.getReplyList());
+        //original setters
+        controllersOrganiser.organiseTweet(tweetResponse, tweet);
 
         List<ReplyResponse> replyResponses = tweet.getReplyList()
                 .stream()
                 .map(reply -> {
                     ReplyResponse replyResponse = new ReplyResponse();
-                    replyResponse.setId(reply.getId());
-                    replyResponse.setContent(reply.getContent());
-                    replyResponse.setUsername(reply.getUser().getUsername());
-                    replyResponse.setLikes(reply.getLikes());
-                    replyResponse.setRetweets(reply.getRetweets());
+                    //original setters
+                    controllersOrganiser.organiseReply(replyResponse, reply);
                     return replyResponse;
                 })
                 .collect(Collectors.toList());
@@ -118,22 +99,14 @@ public class TweetController {
         tweetResponse.setReplyList(replyResponses);
 
         UserResponse userResponse = new UserResponse();
-        User user = tweet.getUser();
-        userResponse.setId(user.getId());
-        userResponse.setUsername(user.getUsername());
-        userResponse.setEmail(user.getEmail());
-
+        //original setters
+        controllersOrganiser.organiseUser(userResponse, tweet);
         tweetResponse.setUsername(userResponse.getUsername());
 
         return tweetResponse;
+        //return new MessageException("Your request done succesfully.",HttpStatus.OK);
     }
 
-    /*
-        @PostMapping("/")
-        public Tweet addTweet(@RequestBody Tweet tweet){
-            return tweetService.save(tweet);
-        }
-    */
     @PostMapping("/")
     public TweetResponse addTweet(@RequestBody Tweet tweet) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -147,24 +120,25 @@ public class TweetController {
 
                 if (userOptional.isPresent()) {
                     User authenticatedUser = userOptional.get();
+
+                    if (tweet.getContent() == null || tweet.getContent().trim().isEmpty()) {
+                        throw new MessageException("Tweet must have non-empty content", HttpStatus.BAD_REQUEST);
+                    }
+
                     tweet.setUser(authenticatedUser);
 
                     Tweet savedTweet = tweetService.save(tweet);
 
                     TweetResponse tweetResponse = new TweetResponse();
-                    tweetResponse.setId(savedTweet.getId());
-                    tweetResponse.setContent(savedTweet.getContent());
-                    tweetResponse.setLikes(savedTweet.getLikes());
-                    tweetResponse.setRetweets(savedTweet.getRetweets());
-
+                    //original setters
+                    controllersOrganiser.organiseTweet(tweetResponse, savedTweet);
 
                     UserResponse userResponse = new UserResponse();
-                    userResponse.setId(authenticatedUser.getId());
-                    userResponse.setUsername(authenticatedUser.getUsername());
-                    userResponse.setEmail(authenticatedUser.getEmail());
-
+                    //original setters
+                    controllersOrganiser.organiseUser(userResponse, tweet);
                     tweetResponse.setUsername(userResponse.getUsername());
 
+                    System.out.println("Your tweet has been posted succesfully" + " " + HttpStatus.CREATED);
                     return tweetResponse;
                 } else {
                     // Handle the case where the user is not found
@@ -180,23 +154,14 @@ public class TweetController {
             return null;
         }
     }
-/*
-    @PutMapping("/{id}")
-    public Tweet updateTweet(@RequestBody Tweet tweet, @PathVariable int id) {
-        Tweet tweetToUpdate = getTweetById(id);
-        if (tweetToUpdate != null) {
-            tweet.setId(id);
-            return tweetService.save(tweet);
-        }
-        return null;
-    }
-*/
 
     @PutMapping("/{id}")
-    public TweetResponse updateTweet(@RequestBody Tweet updatedTweet,@Positive @PathVariable int id) {
+    public TweetResponse updateTweet(@RequestBody Tweet updatedTweet, @Positive @PathVariable int id) {
         TweetResponse tweetToUpdateResponse = getTweetById(id);
 
-        if (tweetToUpdateResponse != null) {
+        if (tweetToUpdateResponse == null) {
+            throw new MessageException("Tweet with given id " + id + " does not exist", HttpStatus.NOT_FOUND);
+        } else if (tweetToUpdateResponse != null) {
             Tweet tweetToUpdate = tweetService.find(id);
 
             if (tweetToUpdate != null) {
@@ -204,7 +169,6 @@ public class TweetController {
                 tweetToUpdate.setContent(updatedTweet.getContent());
                 tweetToUpdate.setLikes(updatedTweet.getLikes());
                 tweetToUpdate.setRetweets(updatedTweet.getRetweets());
-
                 tweetService.save(tweetToUpdate);
 
                 tweetToUpdateResponse.setContent(tweetToUpdate.getContent());
@@ -213,163 +177,152 @@ public class TweetController {
         }
         return null;
     }
-/*
-    @DeleteMapping("/{id}")
-    public Tweet deleteTweet(@Positive @PathVariable int id) {
-        Tweet tweetToDelete = tweetService.find(id);
-        tweetService.delete(tweetToDelete);
-        return tweetToDelete;
-    }
-*/
-/*
+
     @DeleteMapping("/{id}")
     public TweetResponse deleteTweet(@Positive @PathVariable int id) {
         Tweet tweetToDelete = tweetService.find(id);
 
-        if (tweetToDelete != null) {
-
-            tweetToDelete.setUser(null);
-
+        if (tweetToDelete == null) {
+            throw new MessageException("Tweet with given id " + id + " does not exist", HttpStatus.NOT_FOUND);
+        } else if (tweetToDelete != null) {
             TweetResponse tweetResponse = new TweetResponse();
-            tweetResponse.setId(tweetToDelete.getId());
-            tweetResponse.setContent(tweetToDelete.getContent());
-            tweetResponse.setLikes(tweetToDelete.getLikes());
-            tweetResponse.setRetweets(tweetToDelete.getRetweets());
-            tweetResponse.setReplyList(tweetToDelete.getReplyList());
+            //original setters
+            controllersOrganiser.organiseTweet(tweetResponse, tweetToDelete);
+
+            List<ReplyResponse> replyResponses = tweetToDelete.getReplyList()
+                    .stream()
+                    .map(reply -> {
+                        ReplyResponse replyResponse = new ReplyResponse();
+                        //original setters
+                        controllersOrganiser.organiseReply(replyResponse, reply);
+                        return replyResponse;
+                    })
+                    .collect(Collectors.toList());
+
+            tweetResponse.setReplyList(replyResponses);
 
             UserResponse userResponse = new UserResponse();
             User user = tweetToDelete.getUser();
 
             if (user != null) {
-                userResponse.setId(user.getId());
-                userResponse.setUsername(user.getUsername());
-                userResponse.setEmail(user.getEmail());
+                //original setters
+                controllersOrganiser.organiseOnlyUser(userResponse, user);
             }
 
-            tweetResponse.setUserResponse(userResponse);
+            tweetResponse.setUsername(userResponse.getUsername());
 
+            tweetService.softDelete(id);
             tweetService.delete(tweetToDelete);
 
             return tweetResponse;
         }
         return null;
     }
-*/
-@DeleteMapping("/{id}")
-public TweetResponse deleteTweet(@Positive @PathVariable int id) {
-    Tweet tweetToDelete = tweetService.find(id);
 
-    if (tweetToDelete != null) {
-        // You can still create a response for the deleted Tweet before deleting it
-        TweetResponse tweetResponse = new TweetResponse();
-        tweetResponse.setId(tweetToDelete.getId());
-        tweetResponse.setContent(tweetToDelete.getContent());
-        tweetResponse.setLikes(tweetToDelete.getLikes());
-        tweetResponse.setRetweets(tweetToDelete.getRetweets());
-        //tweetResponse.setReplyList(tweetToDelete.getReplyList());
-
-        List<ReplyResponse> replyResponses = tweetToDelete.getReplyList()
-                .stream()
-                .map(reply -> {
-                    ReplyResponse replyResponse = new ReplyResponse();
-                    replyResponse.setId(reply.getId());
-                    replyResponse.setContent(reply.getContent());
-                    replyResponse.setUsername(reply.getUser().getUsername());
-                    return replyResponse;
-                })
-                .collect(Collectors.toList());
-
-        tweetResponse.setReplyList(replyResponses);
-
-        UserResponse userResponse = new UserResponse();
-        User user = tweetToDelete.getUser();
-
-        if (user != null) {
-            userResponse.setId(user.getId());
-            userResponse.setUsername(user.getUsername());
-            userResponse.setEmail(user.getEmail());
-        }
-
-        tweetResponse.setUsername(userResponse.getUsername());
-
-        tweetService.softDelete(id);
-        tweetService.delete(tweetToDelete);
-
-        return tweetResponse;
-    }
-    return null;
-}
-
-/*---------------------------LIKE & UNLIKE and RETWEET & UNDORETWEET METHODS-------------------------------------------*/
+    /*---------------------------LIKE & UNLIKE and RETWEET & UNDORETWEET METHODS-------------------------------------------*/
 
     @PostMapping("/like/{id}")
-    public ResponseEntity<TweetResponse> likeTweet(@Positive @PathVariable int id) {
+    public TweetResponse likeTweet(@Positive @PathVariable int id) {
         Tweet likedTweet = tweetService.likeTweet(id);
+
         if (likedTweet != null) {
-            // Create and return a response with updated likes count
             TweetResponse tweetResponse = new TweetResponse();
-            tweetResponse.setId(likedTweet.getId());
-            tweetResponse.setContent(likedTweet.getContent());
-            tweetResponse.setLikes(likedTweet.getLikes());
-            // ... set other fields ...
-            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+            //original setters
+            controllersOrganiser.organiseLikeAndRetweet(tweetResponse, likedTweet);
+
+            List<ReplyResponse> replyResponses = likedTweet.getReplyList()
+                    .stream()
+                    .map(reply -> {
+                        ReplyResponse replyResponse = new ReplyResponse();
+                        //original setters
+                        controllersOrganiser.organiseReply(replyResponse, reply);
+                        return replyResponse;
+                    })
+                    .collect(Collectors.toList());
+
+            tweetResponse.setReplyList(replyResponses);
+
+            return tweetResponse;
         } else {
-            // Handle the case where the tweet is not found
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new MessageException("Tweet with given id " + id + " does not exist", HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/like/{id}")
-    public ResponseEntity<TweetResponse> unlikeTweet(@Positive @PathVariable int id) {
+    public TweetResponse unlikeTweet(@Positive @PathVariable int id) {
         Tweet unlikedTweet = tweetService.unlikeTweet(id);
         if (unlikedTweet != null) {
             // Create and return a response with updated likes count
             TweetResponse tweetResponse = new TweetResponse();
-            tweetResponse.setId(unlikedTweet.getId());
-            tweetResponse.setContent(unlikedTweet.getContent());
-            tweetResponse.setLikes(unlikedTweet.getLikes());
-            // ... set other fields ...
-            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+            //original setters
+            controllersOrganiser.organiseLikeAndRetweet(tweetResponse, unlikedTweet);
+
+            List<ReplyResponse> replyResponses = unlikedTweet.getReplyList()
+                    .stream()
+                    .map(reply -> {
+                        ReplyResponse replyResponse = new ReplyResponse();
+                        //original setters
+                        controllersOrganiser.organiseReply(replyResponse, reply);
+                        return replyResponse;
+                    })
+                    .collect(Collectors.toList());
+
+            tweetResponse.setReplyList(replyResponses);
+            return tweetResponse;
         } else {
-            // Handle the case where the tweet is not found
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new MessageException("Tweet with given id " + id + " does not exist", HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/retweet/{id}")
-    public ResponseEntity<TweetResponse> retweet(@Positive @PathVariable int id) {
+    public TweetResponse retweet(@Positive @PathVariable int id) {
         Tweet retweetedTweet = tweetService.retweet(id);
         if (retweetedTweet != null) {
-            // Create and return a response with updated likes count
             TweetResponse tweetResponse = new TweetResponse();
-            tweetResponse.setId(retweetedTweet.getId());
-            tweetResponse.setContent(retweetedTweet.getContent());
-            tweetResponse.setLikes(retweetedTweet.getLikes());
-            tweetResponse.setRetweets(retweetedTweet.getRetweets());
-            // ... set other fields ...
-            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+            //original setters
+            controllersOrganiser.organiseLikeAndRetweet(tweetResponse, retweetedTweet);
+
+            List<ReplyResponse> replyResponses = retweetedTweet.getReplyList()
+                    .stream()
+                    .map(reply -> {
+                        ReplyResponse replyResponse = new ReplyResponse();
+                        //original setters
+                        controllersOrganiser.organiseReply(replyResponse, reply);
+                        return replyResponse;
+                    })
+                    .collect(Collectors.toList());
+
+            tweetResponse.setReplyList(replyResponses);
+
+            return tweetResponse;
         } else {
-            // Handle the case where the tweet is not found
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new MessageException("Tweet with given id " + id + " does not exist", HttpStatus.NOT_FOUND);
         }
     }
 
     @DeleteMapping("/retweet/{id}")
-    public ResponseEntity<TweetResponse> undoRetweet(@Positive @PathVariable int id) {
+    public TweetResponse undoRetweet(@Positive @PathVariable int id) {
         Tweet undoRetweetedTweet = tweetService.undoRetweet(id);
         if (undoRetweetedTweet != null) {
-            // Create and return a response with updated likes count
             TweetResponse tweetResponse = new TweetResponse();
-            tweetResponse.setId(undoRetweetedTweet.getId());
-            tweetResponse.setContent(undoRetweetedTweet.getContent());
-            tweetResponse.setLikes(undoRetweetedTweet.getLikes());
-            tweetResponse.setRetweets(undoRetweetedTweet.getRetweets());
-            // ... set other fields ...
-            return new ResponseEntity<>(tweetResponse, HttpStatus.OK);
+            //original setters
+            controllersOrganiser.organiseLikeAndRetweet(tweetResponse, undoRetweetedTweet);
+
+            List<ReplyResponse> replyResponses = undoRetweetedTweet.getReplyList()
+                    .stream()
+                    .map(reply -> {
+                        ReplyResponse replyResponse = new ReplyResponse();
+                        //original setters
+                        controllersOrganiser.organiseReply(replyResponse, reply);
+                        return replyResponse;
+                    })
+                    .collect(Collectors.toList());
+
+            tweetResponse.setReplyList(replyResponses);
+
+            return tweetResponse;
         } else {
-            // Handle the case where the tweet is not found
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new MessageException("Tweet with given id " + id + " does not exist", HttpStatus.NOT_FOUND);
         }
     }
 }
-

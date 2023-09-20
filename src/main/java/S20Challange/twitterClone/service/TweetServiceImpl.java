@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TweetServiceImpl implements TweetService{
+public class TweetServiceImpl implements TweetService {
 
     private TweetRepository tweetRepository;
 
@@ -29,7 +29,7 @@ public class TweetServiceImpl implements TweetService{
     @Override
     public Tweet find(int id) {
         Optional<Tweet> tweet = tweetRepository.findById(id);
-        if(tweet.isPresent()){
+        if (tweet.isPresent()) {
             return tweet.get();
         }
         //TODO throw exception
@@ -48,11 +48,15 @@ public class TweetServiceImpl implements TweetService{
         if (tweetOptional.isPresent()) {
             Tweet tweet = tweetOptional.get();
             tweet.setUser(null);
-            tweetRepository.save(tweet); // Set the user to null
-            tweetRepository.delete(tweet); // Delete the tweet from the database
         }
     }
-
+/*
+    @Override
+    @Transactional
+    public void softDeleteTweet(int id) {
+        tweetRepository.softDeleteTweet(id);
+    }
+*/
     @Override
     @Transactional
     public void delete(Tweet tweet) {

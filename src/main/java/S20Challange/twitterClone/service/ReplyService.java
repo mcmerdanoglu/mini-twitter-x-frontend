@@ -15,6 +15,8 @@ public interface ReplyService {
 
     void delete(Reply reply);
 
+    void softDelete(int id);//tweet delete için tweet tablosundaki useri önce nulla çekmek için yazıldı
+
     Reply likeReply(int id);
 
     Reply unlikeReply(int id);
