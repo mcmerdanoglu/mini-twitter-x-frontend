@@ -41,7 +41,7 @@ public class ReplyServiceImpl implements ReplyService{
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public void softDelete(int id) {
         Optional<Reply> replyOptional = replyRepository.findById(id);
         if (replyOptional.isPresent()) {
@@ -51,7 +51,7 @@ public class ReplyServiceImpl implements ReplyService{
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public void delete(Reply reply) {
         replyRepository.delete(reply);
     }

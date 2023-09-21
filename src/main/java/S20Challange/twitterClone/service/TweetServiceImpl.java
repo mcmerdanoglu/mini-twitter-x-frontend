@@ -42,7 +42,6 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
-    @Transactional
     public void softDelete(int id) {
         Optional<Tweet> tweetOptional = tweetRepository.findById(id);
         if (tweetOptional.isPresent()) {
@@ -58,7 +57,7 @@ public class TweetServiceImpl implements TweetService {
     }
 */
     @Override
-    @Transactional
+    //@Transactional
     public void delete(Tweet tweet) {
         tweetRepository.delete(tweet);
     }
